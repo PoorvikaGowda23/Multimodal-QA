@@ -85,13 +85,14 @@ multimodal-document-qa/
 
 ### 🆕 Upload a Document
 1. Click "Choose File" and select a PDF or image file
-2. Click "Upload" to process the document
 
-    ![MainInterface](images/mainpage.png)
+     ![MainInterface](images/mainpage.png)
+   
+3. Click "Upload" to process the document
 
     ![DocUploading](images/downloadSuccess.png)
    
-3. System will display document metadata (pages, images)
+4. System will display document metadata (pages, images)
 
 ### ❓ Ask Questions
 #### Text Input:
