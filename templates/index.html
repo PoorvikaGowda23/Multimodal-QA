@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimodal Document QA System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .document-area, .qa-area {
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .document-preview {
+            min-height: 200px;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+        }
+        .answer-box {
+            background-color: #f0f7ff;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-top: 1rem;
+        }
+        .supporting-evidence {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        .supporting-image {
+            max-width: 200px;
+            margin: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Multimodal Document QA System</h1>
+        
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="document-area">
+                    <h3>Upload Document</h3>
+                    <form id="upload-form" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <input class="form-control" type="file" id="document-file" accept=".pdf,.png,.jpg,.jpeg">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="upload-button">Upload</button>
+                    </form>
+                    
+                    <div id="document-info" class="mt-3" style="display: none;">
+                        <p><strong>Document loaded:</strong> <span id="document-name"></span></p>
+                        <p><strong>Pages:</strong> <span id="document-pages"></span></p>
+                        <p><strong>Images:</strong> <span id="document-images"></span></p>
+                    </div>
+                </div>
+                
+                <div class="qa-area">
+                    <h3>Ask a Question</h3>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="question-input" placeholder="Enter your question about the document..." disabled>
+                    </div>
+                    <button id="ask-button" class="btn btn-success" disabled>Ask</button>
+                    <button id="voice-button" class="btn btn-info" disabled>🎤 Speak Question</button>
+                    
+                    <div id="answer-container" class="answer-box mt-3" style="display: none;">
+                        <h4>Answer:</h4>
+                        <div id="answer-text"></div>
+                        
+                        <div id="supporting-content" class="mt-3">
+                            <h5>Supporting Evidence:</h5>
+                            <div id="supporting-text" class="supporting-evidence"></div>
+                            <div id="supporting-images" class="d-flex flex-wrap mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let documentId = null;
+        
+        // Upload document
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('document-file');
+            const uploadButton = document.getElementById('upload-button');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            // Change button text and disable during upload
+            uploadButton.textContent = 'Uploading...';
+            uploadButton.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.error) {
+                    alert('Error: ' + result.error);
+                    return;
+                }
+                
+                // Store document ID and update UI
+                documentId = result.document_id;
+                document.getElementById('document-name').textContent = fileInput.files[0].name;
+                document.getElementById('document-pages').textContent = result.pages;
+                document.getElementById('document-images').textContent = result.images;
+                document.getElementById('document-info').style.display = 'block';
+                
+                // Enable question input and voice button
+                document.getElementById('question-input').disabled = false;
+                document.getElementById('ask-button').disabled = false;
+                document.getElementById('voice-button').disabled = false;
+                
+                alert('Document uploaded successfully!');
+            } catch (err) {
+                alert('Error uploading document: ' + err.message);
+            } finally {
+                // Reset button state
+                uploadButton.textContent = 'Upload';
+                uploadButton.disabled = false;
+            }
+        });
+        
+        // Ask question
+        document.getElementById('ask-button').addEventListener('click', async () => {
+            const questionInput = document.getElementById('question-input');
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+            
+            if (!documentId) {
+                alert('Please upload a document first');
+                return;
+            }
+            
+            try {
+                document.getElementById('ask-button').disabled = true;
+                document.getElementById('ask-button').textContent = 'Processing...';
+                
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        document_id: documentId
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.error) {
+                    alert('Error: ' + result.error);
+                    return;
+                }
+                
+                // Display the answer
+                document.getElementById('answer-text').textContent = result.answer;
+                
+                // Display supporting text evidence
+                const supportingTextEl = document.getElementById('supporting-text');
+                supportingTextEl.innerHTML = '';
+                result.supporting_text.forEach(item => {
+                    const textEl = document.createElement('p');
+                    textEl.innerHTML = `<strong>Page ${item.page + 1}:</strong> ${item.text.substring(0, 200)}...`;
+                    supportingTextEl.appendChild(textEl);
+                });
+                
+                // Display supporting images
+                const supportingImagesEl = document.getElementById('supporting-images');
+                supportingImagesEl.innerHTML = '';
+                result.supporting_images.forEach(item => {
+                    const imageContainer = document.createElement('div');
+                    imageContainer.innerHTML = `
+                        <div class="card" style="width: 12rem;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">Page ${item.page + 1}</h6>
+                                <p class="card-text small">${item.caption}</p>
+                            </div>
+                        </div>
+                    `;
+                    supportingImagesEl.appendChild(imageContainer);
+                });
+                
+                document.getElementById('answer-container').style.display = 'block';
+                
+                // Speak the answer
+                speakText(result.answer);
+            } catch (err) {
+                alert('Error processing question: ' + err.message);
+            } finally {
+                document.getElementById('ask-button').disabled = false;
+                document.getElementById('ask-button').textContent = 'Ask';
+            }
+        });
+        
+        // Start voice recognition for question input
+        document.getElementById('voice-button').addEventListener('click', () => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = (event) => {
+                const question = event.results[0][0].transcript;
+                document.getElementById('question-input').value = question;
+            };
+            
+            recognition.onerror = (event) => {
+                alert('Error recognizing speech: ' + event.error);
+            };
+            
+            recognition.start();
+        });
+        
+        // Function to speak text
+        function speakText(text) {
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'en-US';
+            window.speechSynthesis.speak(speech);
+        }
+    </script>
+</body>
+</html> 

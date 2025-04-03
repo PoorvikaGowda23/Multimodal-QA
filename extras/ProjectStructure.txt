@@ -1,0 +1,13 @@
+multimodal_qa/
+├── app.py                   # Main Flask application
+├── document_processor.py    # Document processing functions
+├── question_processor.py    # Question understanding
+├── retrieval_engine.py      # Information retrieval
+├── answer_generator.py      # Answer generation
+├── utils/
+│   ├── image_captioning.py  # Image caption generation
+│   └── text_chunking.py     # Text chunking utilities
+├── templates/
+│   └── index.html           # Frontend template
+└── temp/                    # Temporary storage for uploads
+
