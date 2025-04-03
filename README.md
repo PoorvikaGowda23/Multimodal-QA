@@ -46,8 +46,8 @@ A Flask-based web application that processes documents (PDFs and images) and ans
 
 1. **Clone the repository**
     ```bash
-    git clone https://github.com/your-username/multimodal-document-qa.git
-    cd multimodal-document-qa
+    git clone https://github.com/PoorvikaGowda23/Multimodal-QA
+    cd Multimodal-QA
 2. **Install dependencies**
     ```bash
     pip install -r requirements.txt
