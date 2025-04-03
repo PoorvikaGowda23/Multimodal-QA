@@ -86,6 +86,11 @@ multimodal-document-qa/
 ### 🆕 Upload a Document
 1. Click "Choose File" and select a PDF or image file
 2. Click "Upload" to process the document
+
+    ![MainInterface](images/mainpage.png)
+
+    ![DocUploading](images/downloadSuccess.png)
+   
 3. System will display document metadata (pages, images)
 
 ### ❓ Ask Questions
@@ -93,6 +98,8 @@ multimodal-document-qa/
 1. Type your question in the text box
 2. Click "Ask" to get the answer
 
+     ![QueProcessing](images/queprocessing.png)
+   
 #### 🎤 Voice Input:
 1. Click the microphone button 🎤
 2. Speak your question clearly
@@ -102,6 +109,8 @@ multimodal-document-qa/
 - The system displays:
   - Generated answer
   - Supporting text passages
+
+    ![AnswerGeneration](images/queans.png)
   - Relevant images with captions
 - Answers can be played as audio
 
