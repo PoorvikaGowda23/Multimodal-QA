@@ -1,6 +1,6 @@
 # Multimodal Document QA System 📑✨
 
-A Flask-based web application that processes documents (PDFs and images) and answers questions using text and image content. Supports text-based and voice-based queries with real-time responses, leveraging NLP and computer vision techniques.
+A Flask-based web application that processes documents (PDFs) and answers questions using text and image content. Supports text-based and voice-based queries with real-time responses, leveraging NLP and computer vision techniques.
 
 ## 🌟 Features
 
